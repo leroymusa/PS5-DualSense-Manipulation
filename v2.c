@@ -30,7 +30,58 @@ void set_lightbar_color(hid_device *device, uint8_t r, uint8_t g, uint8_t b) {
     }
 }
 
+int collatz_conjecture(int n, hid_device *device) {
+    int steps = 0;
 
+    while (n > 1) {
+        if (n % 2 == 0) {
+            n /= 2;
+            set_lightbar_color(device, 0, 0, 255); // Blue for even
+        } else {
+            n = 3 * n + 1;
+            set_lightbar_color(device, 255, 0, 0); // Red for odd
+        }
+        steps++;
+        printf("Current value: %d\n", n);
+        usleep(500000); // Delay for visualization
+    }
+    return steps;
+}
+
+void goldbach_conjecture(int n, hid_device *device) {
+    int found = 0;
+
+    for (int i = 2; i <= n / 2; i++) {
+        int j = n - i;
+        int is_prime_i = 1, is_prime_j = 1;
+
+        for (int k = 2; k * k <= i; k++) {
+            if (i % k == 0) {
+                is_prime_i = 0;
+                break;
+            }
+        }
+        for (int k = 2; k * k <= j; k++) {
+            if (j % k == 0) {
+                is_prime_j = 0;
+                break;
+            }
+        }
+
+        if (is_prime_i && is_prime_j) {
+            printf("%d = %d + %d\n", n, i, j);
+            found = 1;
+            set_lightbar_color(device, 0, 255, 0); //Green for success
+            sleep(1);
+            break;
+        }
+    }
+
+    if (!found) {
+        printf("No Goldbach partition found for %d (not even?)\n", n);
+        set_lightbar_color(device, 255, 255, 0); //Yellow for error
+    }
+}
 
 int main() {
     if (hid_init()) {
@@ -47,11 +98,36 @@ int main() {
 
     printf("DualSense controller connected!\n");
 
-    // Example: Set the lightbar to purple (R:128, G:0, B:128)
-    set_lightbar_color(device, 128, 0, 128);
+    // Math conjecture selection
+    printf("Choose a conjecture:\n1. Collatz Conjecture\n2. Goldbach's Conjecture\n");
+    int choice;
+    scanf("%d", &choice);
 
-    // Keep the lightbar on for 5 seconds
-    sleep(5);
+    int number;
+    printf("Enter a number: ");
+    scanf("%d", &number);
+
+    switch (choice) {
+        case 1:
+            printf("Visualizing Collatz Conjecture...\n");
+            int steps = collatz_conjecture(number, device);
+            printf("Collatz Conjecture completed in %d steps.\n", steps);
+            break;
+
+        case 2:
+            if (number % 2 != 0) {
+                printf("Goldbach's Conjecture only applies to even numbers greater than 2.\n");
+            } else {
+                printf("Visualizing Goldbach's Conjecture...\n");
+                goldbach_conjecture(number, device);
+            }
+            break;
+
+        default:
+            printf("Invalid choice.\n");
+            set_lightbar_color(device, 255, 0, 0); //Red for invalid input
+            break;
+    }
 
     // Turn off the lightbar (set color to black)
     set_lightbar_color(device, 0, 0, 0);
