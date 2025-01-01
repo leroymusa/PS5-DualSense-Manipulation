@@ -101,6 +101,8 @@ int main() {
     // Math conjecture selection
     printf("Choose a conjecture:\n1. Collatz Conjecture\n2. Goldbach's Conjecture\n");
     int choice;
+
+    //TODO: Add instructions to run program
     scanf("%d", &choice);
 
     int number;
@@ -108,6 +110,7 @@ int main() {
     scanf("%d", &number);
 
     switch (choice) {
+        
         case 1:
             printf("Visualizing Collatz Conjecture...\n");
             int steps = collatz_conjecture(number, device);
